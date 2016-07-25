@@ -24,119 +24,30 @@ to the `require` section of your `composer.json` file.
 
 ## Usage
 
-### Calendar
+### Options Action
 
-This is the basic widget which encapsulates the plugin into a `yii\bootstrap\Widget` implementation.
+The options action class `faryshta\rest\actions\Options` returns the same
+headers as `yii\rest\ActionOptions` and it also returns a body with a
+deconstructed description of the model.
 
-```php
-
-use tecnocen\yearcalendar\Calendar;
-
-echo Calendar::widget([
-    // 'language' => 'es',
-    'options' => [
-        // HTML attributes for the container.
-        // the `tag` option is specially handled as the HTML tag name
-    ],
-    'clientOptions' => [
-        // JS Options to be passed to the `calendar()` plugin.
-        // see http://bootstrap-year-calendar.com/#Documentation/Options
-    ],
-    'clientEvents' => [
-        // JS Events for the `calendar()` plugin.
-        // see http://bootstrap-year-calendar.com/#Documentation/Events
-    ]
-]);
-```
-
-### ActiveCalendar
-
-The data source calendar uses a [dataProvider](http://www.yiiframework.com/doc-2.0/yii-data-dataproviderinterface.html) to load the `dataSource` property passed to the calendar.
-
-The models returned by the dataProvider must implement the `tecnocen\yearcalendar\data\DataItem` interface.
+This action is meant to be used in the `actions()` method on a controller
 
 ```php
-namespace api\models;
+use faryshta\rest\actions\Options;
 
-use tecnocen\yearcalendar\data\DataItem;
-use yii\db\ActiveRecord;
-use yii\web\JsExpression;
-
-class Conference extends ActiveRecord implements DataItem
+public function actions()
 {
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function getStartDate()
-    {
-        return new JsExpression("new Date('{$this->start_date}')");
-    }
-
-    public function getEndDate()
-    {
-        return new JsExpression("new Date('{$this->end_date}')");
-    }
-
-    // rest of the active record code.
+    return [
+        'options' => [
+            'class' => Options::className(),
+            'modelClas' => $this->modelClass,
+            'extraData' => function ($model) {
+                // array with the extra data you want to return.
+            },
+        ]
+    ]
 }
 ```
-
-Once we have the model we can create the dataProvider.
-
-```php
-use api\models\Conference;
-use tecnocen\yearcalendar\widgets\ActiveCalendar;
-use yii\data\ActiveDataProvider;
-
-echo ActiveCalendar::widget([
-    // 'language' => 'es',
-    'dataProvider' => new ActiveDataProvider([
-        'query' => Conference::find()->andWhere(['active' => 1])
-    ]),
-    'options' => [
-        // HTML attributes for the container.
-        // the `tag` option is specially handled as the HTML tag name
-    ],
-    'clientOptions' => [
-        // JS Options to be passed to the `calendar()` plugin.
-        // The `dataSource` property will be overwritten by the dataProvider.
-        // see http://bootstrap-year-calendar.com/#Documentation/Options
-    ],
-    'clientEvents' => [
-        // JS Events for the `calendar()` plugin.
-        // see http://bootstrap-year-calendar.com/#Documentation/Events
-    ]
-])
-```
-
-### Language
-
-The bootstrap-year-calendar plugin provides the [following languages]
-(https://github.com/Paul-DS/bootstrap-year-calendar/tree/master/js/languages),
-`Calendar` and `ActiveCalendar` support automatic translations using the
-`$language` class property which automatically will load the required js file
-and customize the plugin call.
-
-```php
-echo Calendar::widget([
-    'options' => ['id' => 'es-calendar'],
-    'language' => 'es',
-]);
-```
-
-Will add the JS File `bootstrap-year-calendar.es.js` to the view and run
-
-```js
-jQuery('#es-calendar').calendar({"language":"es"});
-```
-
-On the browser.
-
-## Documentation
-
-TODO
 
 ## License
 
